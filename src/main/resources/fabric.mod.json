@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "projecttable",
-  "version": "${version}",
+  "version": "${mod_version}",
   "name": "${display_name}",
   "description": "Adds the project table you've been so nostalgic about.",
   "authors": [
