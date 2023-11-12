@@ -66,7 +66,7 @@ jobs:
         run: ./gradlew clean build
 
       - name: extract changelog
-        #if: ${{ runner.os == 'Linux' && matrix.java == '17' && github.event.inputs.publish }} # only publish from one OS with latest Java
+        if: ${{ runner.os == 'Linux' && matrix.java == '17' && github.event.inputs.publish }} # only publish from one OS with latest Java
         id: changelog
         run: |
           {
@@ -95,10 +95,8 @@ jobs:
         run: echo ${{ steps.version.outputs.version }}
 
       - name: show changelog
-        #if: ${{ runner.os == 'Linux' && matrix.java == '17' && github.event.inputs.publish }} # only publish from one OS with latest Java
-        run: |
-          echo "${{ github.env.CHANGELOG }}"
-          echo "$CHANGELOG"
+        if: ${{ runner.os == 'Linux' && matrix.java == '17' && github.event.inputs.publish }} # only publish from one OS with latest Java
+        run: echo "$CHANGELOG"
         continue-on-error: true
 
       - name: capture build artifacts
@@ -117,6 +115,6 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           artifacts: "LICENSE,build/libs/*.jar"
-          body: ${{ github.env.CHANGELOG }}
+          body: $CHANGELOG
           tag: ${{ steps.version.outputs.version }}
           name: ${{ steps.versionDisplay.outputs.versionDisplay }}
