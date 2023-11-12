@@ -1,6 +1,7 @@
 # indev
 
 - Add Project Table to "Decorations" creative tab
+- Add Polymorph Integration (#19)
 
 # 1.0.2
 
