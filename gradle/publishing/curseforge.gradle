@@ -14,6 +14,7 @@ curseforge {
 			requiredDependency("fabric-language-kotlin")
 			requiredDependency("forge-config-api-port-fabric")
 			optionalDependency("roughly-enough-items")
+			optionalDependency("polymorph-fabric")
 		}
 
 		// https://github.com/mraliscoder/plasmo-voice/blob/41243bc77589d975acde5385dd86414b1c92a2a8/fabric/build.gradle.kts#L173
