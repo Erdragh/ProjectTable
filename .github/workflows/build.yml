@@ -66,7 +66,7 @@ jobs:
         run: ./gradlew clean build
 
       - name: extract changelog
-        if: ${{ runner.os == 'Linux' && matrix.java == '17' && github.event.inputs.publish }} # only publish from one OS with latest Java
+        #if: ${{ runner.os == 'Linux' && matrix.java == '17' && github.event.inputs.publish }} # only publish from one OS with latest Java
         id: changelog
         run: |
           {
@@ -95,8 +95,10 @@ jobs:
         run: echo ${{ steps.version.outputs.version }}
 
       - name: show changelog
-        if: ${{ runner.os == 'Linux' && matrix.java == '17' && github.event.inputs.publish }} # only publish from one OS with latest Java
-        run: echo "${{ steps.changelog.outputs.changelog }}"
+        #if: ${{ runner.os == 'Linux' && matrix.java == '17' && github.event.inputs.publish }} # only publish from one OS with latest Java
+        run: |
+          echo "${{ github.env.CHANGELOG }}"
+          echo "$CHANGELOG"
         continue-on-error: true
 
       - name: capture build artifacts
