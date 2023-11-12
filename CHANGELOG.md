@@ -1,3 +1,7 @@
+# indev
+
+- Add Project Table to "Decorations" creative tab
+
 # 1.0.2
 
 - [x] Fix the Item Dupe mentioned in [Issue 16](https://github.com/Erdragh/ProjectTableRefabricated/issues/16)
