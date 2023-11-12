@@ -6,14 +6,8 @@ ext /*-ra properties*/ {
 
 	properties.forEach ((k, v) -> set(k, v))
 
-	versionEnv = System.getenv("VERSION_NUMBER")
-
-	if (versionEnv != null) {
-		version = versionEnv
-	}
-
 	version_valid = versionValidForPublishing(version)
-	published_version_name = version_valid ? makeName(version, display_name) : "INVALID"
+	published_version_name = version_valid ? makeName(version, minecraft_version, display_name) : "INVALID"
 	changelog_text = getChangelog(file(changelog_file))
 }
 
@@ -24,12 +18,23 @@ tasks.register("publishMod") {
 	}
 }
 
-static String makeName(String version, String displayName) {
+tasks.register("printChangelog") {
+	println(changelog_text)
+}
+
+tasks.register("printVersionDisplay") {
+	println(published_version_name)
+}
+
+tasks.register("printVersion") {
+	println(version)
+}
+
+static String makeName(String version, String minecraftVersion, String displayName) {
 	String projectVersion = "v" + version.split("-build")[0].replace("-", ".")
-	String mcVersion = version.split("\\+mc")[1]
 	String rawPatch = System.getenv("PATCH_NUMBER")
 	String patch = rawPatch === null || rawPatch.isEmpty() || rawPatch == "0" ? "" : "Patch $rawPatch"
-	return "$displayName $mcVersion $projectVersion $patch".trim()
+	return "$displayName $minecraftVersion $projectVersion $patch".trim()
 }
 
 static boolean versionValidForPublishing(String version) {
@@ -38,8 +43,8 @@ static boolean versionValidForPublishing(String version) {
 
 static String getChangelog(File changelogFile) {
 	String text = Files.readString(changelogFile.toPath())
-	String[] split = text.split("----------")
-	if (split.length != 2)
+	String[] split = text.split("# \\d+(\\.\\d+)+?[\\w.-_]+")
+	if (split.length < 2)
 		throw new IllegalStateException("Malformed changelog")
 	return split[1].trim()
 }
