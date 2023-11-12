@@ -14,5 +14,6 @@ modrinth {
 		required.project "fabric-language-kotlin"
 		required.project "forge-config-api-port"
 		optional.project "rei"
+		optional.project "polymorph"
 	}
 }

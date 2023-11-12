@@ -2,8 +2,10 @@ package com.github.erdragh.projecttable.client.screen
 
 import com.github.erdragh.projecttable.ProjectTable
 import com.github.erdragh.projecttable.block.ModBlocks
+import com.github.erdragh.projecttable.compat.polymorph.getPlayerRecipe
 import com.github.erdragh.projecttable.config.ProjectTableConfig
 import com.github.erdragh.projecttable.utils.GenericTypeChecker
+import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.recipebook.ServerPlaceRecipe
 import net.minecraft.server.level.ServerPlayer
@@ -132,11 +134,14 @@ class ProjectTableScreenHandler : RecipeBookMenu<CraftingContainer> {
                 val serverPlayer = player as ServerPlayer
                 var result = ItemStack.EMPTY
 
-                val foundRecipe =
+                // Polymorph integration, adapted from: https://github.com/illusivesoulworks/polymorph/blob/1.20.x/common/src/main/java/com/illusivesoulworks/polymorph/mixin/core/MixinCraftingMenu.java
+                val actualRecipe = if (FabricLoader.getInstance().isModLoaded("polymorph"))
+                    getPlayerRecipe(menu, RecipeType.CRAFTING, craftingContainer, level, player)
+                else
                     level.server?.recipeManager?.getRecipeFor(RecipeType.CRAFTING, craftingContainer, level)
 
-                if (foundRecipe != null && foundRecipe.isPresent) {
-                    val recipe = foundRecipe.get()
+                if (actualRecipe != null && actualRecipe.isPresent) {
+                    val recipe = actualRecipe.get()
                     if (resultContainer.setRecipeUsed(level, serverPlayer, recipe)) {
                         result = recipe.assemble(craftingContainer)
                     }
