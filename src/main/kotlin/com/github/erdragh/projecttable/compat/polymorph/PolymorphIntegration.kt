@@ -21,5 +21,5 @@ fun <T : Recipe<C>, C : Container> getPlayerRecipe(
     level: Level,
     player: Player
 ): Optional<T> {
-    return RecipeSelection.getPlayerRecipe(menu, pType, inventory, level, player);
+    return RecipeSelection.getPlayerRecipe(menu, pType, inventory, level, player)
 }
