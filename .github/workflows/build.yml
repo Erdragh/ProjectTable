@@ -14,8 +14,13 @@ on:
       patch:
         description: Patch number, 0 for first
         required: true
-  pull_request:
   push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -25,8 +30,8 @@ jobs:
         java: [
           17,    # Current Java LTS & minimum supported by Minecraft
         ]
-        # and run on both Linux and Windows
-        os: [ubuntu-22.04, windows-2022]
+        # and run on both Linux and macOS
+        os: [ubuntu-latest, macos-latest]
 
     runs-on: ${{ matrix.os }}
     env:
@@ -53,27 +58,38 @@ jobs:
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
 
-      # the extracted version is only really relevant for
-      # the artifact names and for publishing, as such, it
-      # should (and can, because it's a bash script) only
-      # run on Linux
-      - name: extract version
-        if: ${{ runner.os != 'Windows' }}
-        id: getversion
+      - name: gradle clean build
+        run: ./gradlew clean build
+
+      - name: extract changelog
+        if: ${{ runner.os == 'Linux' && matrix.java == '17' && github.event.inputs.publish }} # only publish from one OS with latest Java
+        id: changelog
         run: |
-          echo "version=$(.github/scripts/extract_version.sh)" >> "$GITHUB_OUTPUT"
+          echo "changelog=$(./gradlew -q printChangelog)" >> "$GITHUB_OUTPUT"
+
+      - name: extract version number
+        if: ${{ runner.os == 'Linux' && matrix.java == '17' && github.event.inputs.publish }} # only publish from one OS with latest Java
+        id: version
+        run: |
+          echo "version=$(./gradlew -q printVersion)" >> "$GITHUB_OUTPUT"
+
+      - name: extract version display name
+        if: ${{ runner.os == 'Linux' && matrix.java == '17' && github.event.inputs.publish }} # only publish from one OS with latest Java
+        id: versionDisplay
+        run: |
+          echo "versionDisplay=$(./gradlew -q printVersionDisplay)" >> "$GITHUB_OUTPUT"
 
       # windows throws an error if the second parameter for
       # echo is not set, which it will never be, because it's
       # only set for Linux
-      - name: show extracted version
-        if: ${{ runner.os != 'Windows' }}
-        run: echo ${{ steps.getversion.outputs.version }}
+      - name: show version
+        if: ${{ runner.os == 'Linux' && matrix.java == '17' && github.event.inputs.publish }} # only publish from one OS with latest Java
+        run: echo ${{ steps.version.outputs.version }}
 
-      - name: build
-        env:
-          VERSION_NAME: ${{ steps.getversion.outputs.version }}
-        run: ./gradlew clean build
+      - name: show changelog
+        if: ${{ runner.os == 'Linux' && matrix.java == '17' && github.event.inputs.publish }} # only publish from one OS with latest Java
+        run: echo "${{ steps.changelog.outputs.changelog }}"
+        continue-on-error: true
 
       - name: capture build artifacts
         if: ${{ runner.os == 'Linux' && matrix.java == '17' }} # Only upload artifacts built from latest java on one OS
@@ -83,18 +99,14 @@ jobs:
           path: build/libs/
 
       - name: publish to Modrinth and CurseForge
-        env:
-          VERSION_NAME: ${{ steps.getversion.outputs.version }}
         if: ${{ runner.os == 'Linux' && matrix.java == '17' && github.event.inputs.publish }} # only publish from one OS with latest Java
         run: ./gradlew publishMod
 
-      - name: Create GitHub Release
+      - name: create GitHub Release
         if: ${{ runner.os == 'Linux' && matrix.java == '17' && github.event.inputs.publish }} # only publish from one OS with latest Java
-        uses: marvinpinto/action-automatic-releases@latest
+        uses: ncipollo/release-action@v1
         with:
-          repo_token: "${{ secrets.PUBLISH_GITHUB_TOKEN }}"
-          automatic_release_tag: ${{ steps.getversion.outputs.version }}
-          prerelease: false
-          files: |
-            LICENSE
-            build/libs/*.jar
+          artifacts: "LICENSE,build/libs/*.jar"
+          body: ${{ steps.changelog.outputs.changelog }}
+          tag: ${{ steps.version.outputs.version }}
+          name: ${{ steps.versionDisplay.outputs.versionDisplay }}
