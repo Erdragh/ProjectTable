@@ -22,6 +22,7 @@ able to find a 1.18.2 Fabric Version that met our requirements. So let's talk ab
 - Full REI Integration. The Block is registered as a Workbench for default crafting and has quick-input support.
 - Configurable extra storage. People who know the Project Table from using it way back when may remember it featuring
   two extra rows of storage. That is the default in this mod too, but you can configure it from 0 all the way to 5 rows.
+- Polymorph Integration, allowing you to select between different conflicting recipes if it is installed.
 
 ## Future Versions
 
