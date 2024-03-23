@@ -1,4 +1,5 @@
-# indev
+# 1.1.0
+- Show items in world
 
 # 1.0.3
 
